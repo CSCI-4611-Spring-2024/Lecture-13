@@ -12,6 +12,10 @@ export class App extends gfx.GfxApp
     private skybox: gfx.Mesh3;
     private sphere: gfx.Mesh3;
 
+    private sphereStartPosition: gfx.Vector3;
+    private sphereEndPosition: gfx.Vector3;
+    private sphereAlpha: number;
+
     // --- Create the App class ---
     constructor()
     {
@@ -20,7 +24,11 @@ export class App extends gfx.GfxApp
 
         this.ground = gfx.Geometry3Factory.createBox(50, 1, 50);
         this.skybox = gfx.Geometry3Factory.createBox(100, 100, 100);
-        this.sphere = gfx.Geometry3Factory.createSphere();
+        this.sphere = gfx.Geometry3Factory.createSphere(0.5);
+    
+        this.sphereStartPosition = new gfx.Vector3(-4, 1, -5);
+        this.sphereEndPosition = new gfx.Vector3(4, 1, -5);
+        this.sphereAlpha = 0;
     }
 
 
@@ -45,7 +53,10 @@ export class App extends gfx.GfxApp
         this.skybox.material.side = gfx.Side.BACK;
         this.skybox.material.setColor(new gfx.Color(0.698, 1, 1));
 
-        this.sphere.position.set(0, 1, -5);
+        this.sphere.position.lerp(
+            this.sphereStartPosition, 
+            this.sphereEndPosition,
+            this.sphereAlpha);
 
         this.scene.add(ambientLight);
         this.scene.add(directionalLight);
@@ -58,6 +69,14 @@ export class App extends gfx.GfxApp
     // --- Update is called once each frame by the main graphics loop ---
     update(deltaTime: number): void 
     {
+        const lerpSpeed = 0.5; // how much should alpha change per sec
 
+        this.sphereAlpha += lerpSpeed * deltaTime;
+        this.sphereAlpha = gfx.MathUtils.clamp(this.sphereAlpha, 0, 1);
+
+        this.sphere.position.lerp(
+            this.sphereStartPosition, 
+            this.sphereEndPosition,
+            this.sphereAlpha);
     }
 }
