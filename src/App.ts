@@ -14,7 +14,10 @@ export class App extends gfx.GfxApp
 
     private sphereStartPosition: gfx.Vector3;
     private sphereEndPosition: gfx.Vector3;
+    private sphereStartColor: gfx.Color;
+    private sphereEndColor: gfx.Color;
     private sphereAlpha: number;
+    private lerpDirection: number;
 
     // --- Create the App class ---
     constructor()
@@ -28,7 +31,10 @@ export class App extends gfx.GfxApp
     
         this.sphereStartPosition = new gfx.Vector3(-4, 1, -5);
         this.sphereEndPosition = new gfx.Vector3(4, 1, -5);
+        this.sphereStartColor = new gfx.Color(1, 1, 0);
+        this.sphereEndColor = new gfx.Color(0, 1, 1);
         this.sphereAlpha = 0;
+        this.lerpDirection = 1;
     }
 
 
@@ -58,6 +64,12 @@ export class App extends gfx.GfxApp
             this.sphereEndPosition,
             this.sphereAlpha);
 
+        const sphereColor = gfx.Color.lerp(
+            this.sphereStartColor, 
+            this.sphereEndColor,
+            this.sphereAlpha);
+        this.sphere.material.setColor(sphereColor);
+
         this.scene.add(ambientLight);
         this.scene.add(directionalLight);
         this.scene.add(this.ground);
@@ -71,12 +83,24 @@ export class App extends gfx.GfxApp
     {
         const lerpSpeed = 0.5; // how much should alpha change per sec
 
-        this.sphereAlpha += lerpSpeed * deltaTime;
+        this.sphereAlpha += lerpSpeed * deltaTime *  this.lerpDirection;
+
+        if(this.sphereAlpha > 1 || this.sphereAlpha < 0)
+        {
+            this.lerpDirection *= -1;
+        }
+
         this.sphereAlpha = gfx.MathUtils.clamp(this.sphereAlpha, 0, 1);
 
         this.sphere.position.lerp(
             this.sphereStartPosition, 
             this.sphereEndPosition,
             this.sphereAlpha);
+
+        const sphereColor = gfx.Color.lerp(
+            this.sphereStartColor, 
+            this.sphereEndColor,
+            this.sphereAlpha);
+        this.sphere.material.setColor(sphereColor);
     }
 }
